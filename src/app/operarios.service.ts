@@ -13,6 +13,7 @@ export class OperariosService {
     const operariosData: Operario[] = [
       {
         nombre: 'Operario 1',
+        date: new Date('2024/10/24'),
         actividades: {
           '08:00': 'Actividad A',
           '09:00': 'Actividad B',
@@ -23,6 +24,7 @@ export class OperariosService {
       },
       {
         nombre: 'Operario 2',
+        date: new Date('10/24/2024'),
         actividades: {
           '08:00': 'Actividad E',
           '10:00': 'Actividad F',
@@ -32,6 +34,7 @@ export class OperariosService {
       },
       {
         nombre: 'Operario 3',
+        date: new Date('10/20/2024'),
         actividades: {
           '09:00': 'Actividad H',
           '11:00': 'Actividad I',
@@ -41,6 +44,7 @@ export class OperariosService {
       },
       {
         nombre: 'Operario 4',
+        date: new Date('10/11/2024'),
         actividades: {
           '08:00': 'Actividad K',
           '10:00': 'Actividad L',
@@ -50,6 +54,7 @@ export class OperariosService {
       },
       {
         nombre: 'Operario 5',
+        date: new Date('10/10/2024'),
         actividades: {
           '09:00': 'Actividad N',
           '11:00': 'Actividad O',
