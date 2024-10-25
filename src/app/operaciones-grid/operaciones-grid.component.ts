@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ColDef, CellClassParams, ValueGetterParams } from 'ag-grid-community';
 import { AgGridModule } from 'ag-grid-angular';
 import { OperariosService } from '../operarios.service';
-import { FormsModule } from '@angular/forms'; // Importa FormsModule
+import { FormsModule } from '@angular/forms';
 
 // Definir una interfaz para los operarios y sus actividades
 export interface Operario {
   nombre: string;
-  actividades: { [key: string]: string | null }; // Las actividades son por hora, y pueden ser null
+  actividades: { [key: string]: string | null };
+  imagen?: string; // Agregar campo para imagen o avatar
 }
 
 @Component({
@@ -15,7 +16,8 @@ export interface Operario {
   templateUrl: './operaciones-grid.component.html',
   styleUrls: ['./operaciones-grid.component.scss'],
   standalone: true,
-  imports: [AgGridModule, FormsModule]  // Añadir FormsModule aquí
+  encapsulation: ViewEncapsulation.None, // Desactivar encapsulamiento
+  imports: [AgGridModule, FormsModule]
 })
 export class OperacionesGridComponent implements OnInit {
   workingHours = [
@@ -23,22 +25,39 @@ export class OperacionesGridComponent implements OnInit {
     '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
   ];
 
-  operarios: Operario[] = []; // Inicializa como un array vacío con el tipo Operario[]
-  mostrarOperarios: { [key: string]: boolean } = {}; // Para habilitar/deshabilitar la visualización de cada operario
+  operarios: Operario[] = [];
+  mostrarOperarios: { [key: string]: boolean } = {};
 
+  // Definir las columnas, incluyendo el cellRenderer para mostrar imagen/operario
   columnas: ColDef[] = [
-    { field: 'nombre', headerName: 'Operario', width: 150 },
+    {
+      field: 'nombre',
+      headerName: 'Operario',
+      width: 200,
+      cellRenderer: (params: any) => {
+        const operario = params.data;
+        const imgSrc = operario.imagen ? operario.imagen : 'https://example.com/default-avatar.png'; // Imagen por defecto
+
+        return `
+          <div style="padding-top: 1rem; display: flex; flex-direction: column; align-items: center;">
+            <img src="${imgSrc}" alt="${operario.nombre}" style="width: 50px; height: 50px; border-radius: 50%; margin-bottom: 5px;" />
+            <div style="text-align: center;">${operario.nombre}</div>
+          </div>
+        `;
+      },
+      cellStyle: { backgroundColor: '#f0f8ff', color: '#333' } // Estilo específico para la columna de operarios
+    },
     ...this.workingHours.map(hora => ({
       headerName: hora,
-      valueGetter: (params: ValueGetterParams) => params.data.actividades[hora] || '', // Obtener el valor dinámico de las actividades
-      editable: hora !== '12:00', // Deshabilitar la celda de 12:00
-      cellStyle: (params: CellClassParams) => {  // Asignar el tipo a params
+      valueGetter: (params: ValueGetterParams) => params.data.actividades[hora] || '',
+      editable: hora !== '12:00',
+      cellStyle: (params: CellClassParams) => {
         if (hora === '12:00') {
-          return { backgroundColor: '#f5f5f5', color: '#999999', fontWeight: 'bold' }; // Estilo para las 12:00
+          return { backgroundColor: '#f5f5f5', color: '#999999', fontWeight: 'bold' };
         }
         return null;
       },
-      width: hora === '12:00' || hora === '12:30' ? 90 : 120 // Reducir el ancho de 12:00 y 12:30
+      width: hora === '12:00' || hora === '12:30' ? 90 : 120
     }))
   ];
 
@@ -48,33 +67,30 @@ export class OperacionesGridComponent implements OnInit {
       sortable: true,
       filter: true
     },
+    getRowHeight: () => 120,  // Ajustar la altura de las filas
     onCellValueChanged: (event: any) => {
       console.log('Actividad cambiada:', event.data);
     }
   };
 
-  constructor(private operariosService: OperariosService) { }
+  constructor(private operariosService: OperariosService) {}
 
   ngOnInit(): void {
-    // Obtener datos de operarios desde la API simulada
     this.operariosService.getOperarios().subscribe((data: Operario[]) => {
       this.operarios = data;
 
-      // Inicializar el objeto mostrarOperarios con todos los operarios habilitados
       this.operarios.forEach(operario => {
         this.mostrarOperarios[operario.nombre] = true;
       });
     });
   }
 
-  // Filtrar los operarios seleccionados para mostrar en la tabla
   getOperariosFiltrados(): Operario[] {
     return this.operarios.filter(operario => this.mostrarOperarios[operario.nombre]);
   }
 
-  // Verificar si una hora está disponible para asignar actividad
   isTimeAvailable(time: string): boolean {
-    return time !== '12:00';  // Solo 12:00 no está disponible
+    return time !== '12:00';
   }
 
   assignActivity(time: string, activity: string) {

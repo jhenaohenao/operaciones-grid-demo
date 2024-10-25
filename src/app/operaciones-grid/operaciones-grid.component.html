@@ -1,22 +1,24 @@
-<div class="operarios-checkboxes">
-  <h3>Mostrar Operarios</h3>
-  @for(operario of operarios; track operario.nombre){
-    <div>
-    <label>
-      <input
-        type="checkbox"
-        [(ngModel)]="mostrarOperarios[operario.nombre]"
-      />
-      {{ operario.nombre }}
-    </label>
-  </div>}
-</div>
+<div class="grid-container">
+  <!-- <div class="operarios-checkboxes">
+    <h3>Mostrar Operarios</h3>
+    @for(operario of operarios; track operario.nombre){
+      <div>
+      <label>
+        <input
+          type="checkbox"
+          [(ngModel)]="mostrarOperarios[operario.nombre]"
+        />
+        {{ operario.nombre }}
+      </label>
+    </div>
+  }
+  </div> -->
 
-<ag-grid-angular
-  style="width: 100%; height: 400px;"
-  class="ag-theme-alpine"
-  [rowData]="getOperariosFiltrados()"
-  [columnDefs]="columnas"
-  [gridOptions]="gridOptions"
-  rowSelection="multiple">
-</ag-grid-angular>
+  <ag-grid-angular
+    class="ag-theme-alpine custom-grid-theme"
+    [rowData]="getOperariosFiltrados()"
+    [columnDefs]="columnas"
+    [gridOptions]="gridOptions"
+    rowSelection="multiple">
+  </ag-grid-angular>
+</div>

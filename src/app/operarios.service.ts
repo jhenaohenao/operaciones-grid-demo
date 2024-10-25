@@ -19,7 +19,8 @@ export class OperariosService {
           '12:00': null, // Hora de receso
           '12:30': 'Actividad C',
           '14:00': 'Actividad D',
-        }
+        },
+        imagen: 'assets/img/avatar.png'
       },
       {
         nombre: 'Operario 2',
@@ -28,7 +29,8 @@ export class OperariosService {
           '10:00': 'Actividad F',
           '12:00': null, // Hora de receso
           '13:00': 'Actividad G',
-        }
+        },
+        imagen: 'assets/img/avatar.png'
       },
       {
         nombre: 'Operario 3',
@@ -37,7 +39,8 @@ export class OperariosService {
           '11:00': 'Actividad I',
           '12:00': null, // Hora de receso
           '15:00': 'Actividad J',
-        }
+        },
+        imagen: 'assets/img/avatar.png'
       },
       {
         nombre: 'Operario 4',
@@ -46,7 +49,8 @@ export class OperariosService {
           '10:00': 'Actividad L',
           '12:00': null, // Hora de receso
           '16:00': 'Actividad M',
-        }
+        },
+        imagen: 'assets/img/avatar.png'
       },
       {
         nombre: 'Operario 5',
@@ -55,7 +59,8 @@ export class OperariosService {
           '11:00': 'Actividad O',
           '12:00': null, // Hora de receso
           '17:00': 'Actividad P',
-        }
+        },
+        imagen: 'assets/img/avatar.png'
       }
     ];
 

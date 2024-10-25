@@ -1,16 +1,49 @@
-.ag-theme-alpine {
-  height: 100%;
+.custom-grid-theme {
+  height: calc(100vh - 80px); // Ajusta el grid para ocupar el alto disponible
   width: 100%;
-}
-.operarios-checkboxes {
-  margin-bottom: 20px;
 
-  h3 {
-    margin-bottom: 10px;
+  /* Estilo del header */
+  .ag-header {
+    background-color: #4a90e2 !important; // Color de fondo del encabezado
+    color: #fff !important;               // Color de texto del encabezado
+    font-size: 16px !important;
+    font-weight: bold !important;
   }
 
-  label {
-    display: block;
-    margin-bottom: 5px;
+  .ag-header-cell {
+    border-right: 1px solid #e0e0e0 !important; // Borde derecho de las celdas de encabezado
+  }
+
+  .ag-header-cell-label {
+    display: flex !important;
+    justify-content: center !important; // Centrar el texto en el encabezado
+    align-items: center !important;
+    padding: 10px !important;
+  }
+
+  .ag-header-row {
+    border-bottom: 2px solid #ddd !important; // Borde inferior de la fila del encabezado
+  }
+
+  /* Estilos para las celdas */
+  .ag-cell {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    border-right: 1px solid #e0e0e0 !important; // Borde derecho de cada celda
+  }
+
+  /* Bordes de las filas */
+  .ag-row {
+    // height: 80px !important; // Altura de cada fila
+    border-bottom: 1px solid #e0e0e0 !important; // Borde inferior de cada fila
+  }
+
+  /* Estilo del contenedor principal del grid */
+  .ag-root-wrapper {
+    border: 1px solid #ccc !important; // Borde del contenedor principal del grid
+    border-radius: 8px !important;     // Borde redondeado del grid
   }
 }
