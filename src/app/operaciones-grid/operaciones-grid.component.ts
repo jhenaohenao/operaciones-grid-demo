@@ -95,12 +95,6 @@ export class OperacionesGridComponent implements OnInit {
             filter: 'agDateColumnFilter',
             width: 150,
             pinned: 'left',
-            valueFormatter: (params) => {
-              if (params.value) {
-                return this.formatDate(new Date(params.value));
-              }
-              return '';
-            }
           },
           {
             field: 'nombre',
