@@ -1,16 +1,14 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ColDef, CellClassParams, ValueGetterParams, GridOptions, CellValueChangedEvent, ValueSetterParams, ColGroupDef, CellStyle } from 'ag-grid-community';
+import { ColDef, CellClassParams, ValueGetterParams, GridOptions, CellValueChangedEvent, ValueSetterParams, ColGroupDef } from 'ag-grid-community';
 import { AgGridModule } from 'ag-grid-angular';
 import { OperariosService } from '../operarios.service';
 import { FormsModule } from '@angular/forms';
-import { addDays, format } from 'date-fns';
 
-// Definir una interfaz para los operarios y sus actividades
 export interface Operario {
   nombre: string;
   date: Date;
   actividades: { [key: string]: string | null };
-  imagen?: string; // Agregar campo para imagen o avatar
+  imagen?: string;
 }
 
 @Component({
@@ -18,7 +16,7 @@ export interface Operario {
   templateUrl: './operaciones-grid.component.html',
   styleUrls: ['./operaciones-grid.component.scss'],
   standalone: true,
-  encapsulation: ViewEncapsulation.None, // Desactivar encapsulamiento
+  encapsulation: ViewEncapsulation.None,
   imports: [AgGridModule, FormsModule]
 })
 export class OperacionesGridComponent implements OnInit {
@@ -62,14 +60,12 @@ export class OperacionesGridComponent implements OnInit {
   }
 
   private getFechasAMostrar(todasLasFechas: Date[]): Date[] {
-    // Si hay una fecha filtrada, comenzar desde esa fecha
     const startDate = this.filtroActivo && this.fechaFiltrada
       ? new Date(this.fechaFiltrada)
       : new Date();
 
     startDate.setHours(0, 0, 0, 0);
 
-    // Generar array de fechas desde la fecha inicial hasta numeroDiasMostrar días después
     const fechasSiguientes: Date[] = [];
     for (let i = 0; i < this.numeroDiasMostrar; i++) {
       const fecha = new Date(startDate);
@@ -80,70 +76,87 @@ export class OperacionesGridComponent implements OnInit {
   }
 
   private initializeColumns() {
-    // Obtener todas las fechas únicas
     const todasLasFechas = [...new Set(
       this.operarios.map(op => op.date.toDateString())
     )].map(dateStr => new Date(dateStr));
 
-    // Ordenar todas las fechas
     todasLasFechas.sort((a, b) => a.getTime() - b.getTime());
 
-    // Obtener las fechas que se deben mostrar
     const fechasAMostrar = this.getFechasAMostrar(todasLasFechas);
 
-    // Columnas base
     this.columnas = [
       {
-        field: 'nombre',
-        headerName: 'Operario',
-        width: 150,
-        pinned: 'left'
-      } as ColDef,
-      {
-        field: 'date',
-        headerName: 'Fecha',
-        filter: 'agDateColumnFilter',
-        width: 200,
-        valueFormatter: (params) => {
-          if (params.value) {
-            return this.formatDate(new Date(params.value));
+        headerName: '', // Encabezado vacío para evitar que ocupe espacio en la fila superior
+        marryChildren: true,
+        children: [
+          {
+            field: 'date',
+            headerName: 'Fecha',
+            filter: 'agDateColumnFilter',
+            width: 150,
+            pinned: 'left',
+            valueFormatter: (params) => {
+              if (params.value) {
+                return this.formatDate(new Date(params.value));
+              }
+              return '';
+            }
+          },
+          {
+            field: 'nombre',
+            headerName: 'Operario',
+            width: 150,
+             pinned: 'left',
+            cellRenderer: (params: any) => {
+              const operario = params.data;
+              const imgSrc = operario.imagen ? operario.imagen : 'https://example.com/default-avatar.png';
+              return `
+                <div style="padding-top: 1rem; display: flex; flex-direction: column; align-items: center;">
+                  <img src="${imgSrc}" alt="${operario.nombre}" style="width: 50px; height: 50px; border-radius: 50%; margin-bottom: 5px;" />
+                  <div style="text-align: center;">${operario.nombre}</div>
+                </div>
+              `;
+            },
+            cellStyle: { backgroundColor: '#f0f8ff', color: '#333' }
           }
-          return '';
-        },
-      } as ColDef
+        ]
+      }
     ];
 
-    // Crear grupos de columnas por fecha
     fechasAMostrar.forEach(date => {
       const formattedDate = this.formatDate(date);
-      const dayColumns: ColDef[] = this.workingHours.map(hora => ({
-        headerName: hora,
-        field: `actividades.${hora}`,
-        editable: true,
-        width: 100,
-        valueGetter: (params: ValueGetterParams) => {
-          if (params.data.date instanceof Date) {
-            if (this.isSameDay(params.data.date, date)) {
-              return params.data.actividades[hora] || '';
+      const dayColumns: ColDef[] = this.workingHours.map(hora => {
+        const columnWidth = hora === '12:00' || hora === '12:30' ? 90 : 120;
+
+        return {
+          headerName: hora,
+          field: `actividades.${hora}`,
+          editable: hora !== '12:00',
+          width: columnWidth,
+          valueGetter: (params: ValueGetterParams) => {
+            if (params.data.date instanceof Date) {
+              if (this.isSameDay(params.data.date, date)) {
+                return params.data.actividades[hora] || '';
+              }
             }
+            return '';
+          },
+          valueSetter: (params: ValueSetterParams) => {
+            if (!params.data.actividades) params.data.actividades = {};
+            if (params.data.date instanceof Date && this.isSameDay(params.data.date, date)) {
+              params.data.actividades[hora] = params.newValue;
+              return true;
+            }
+            return false;
+          },
+          cellStyle: (params: CellClassParams) => {
+            if (hora === '12:00') {
+              return { backgroundColor: '#f5f5f5', color: '#999999', fontWeight: 'bold' };
+            }
+            return null;
           }
-          return '';
-        },
-        valueSetter: (params: ValueSetterParams) => {
-          if (!params.data.actividades) params.data.actividades = {};
-          if (params.data.date instanceof Date && this.isSameDay(params.data.date, date)) {
-            params.data.actividades[hora] = params.newValue;
-            return true;
-          }
-          return false;
-        },
-        cellStyle: (params: CellClassParams) => {
-          if (hora === '12:00') {
-            return { backgroundColor: '#f5f5f5', color: '#999999', fontWeight: 'bold' };
-          }
-          return null;
-        },
-      }));
+        };
+      });
 
       const dayGroup: ColGroupDef = {
         headerName: formattedDate,
@@ -161,14 +174,13 @@ export class OperacionesGridComponent implements OnInit {
       sortable: true,
       filter: true,
       suppressMovable: true,
-      getRowHeight: () => 120  // Ajustar la altura de las filas
     },
+    getRowHeight: () => 120,
     suppressColumnVirtualisation: true,
     onFilterChanged: (event) => {
       const filterModel = event.api.getFilterModel();
       this.filtroActivo = Object.keys(filterModel).length > 0;
 
-      // Obtener la fecha filtrada si existe
       if (this.filtroActivo && filterModel['date']) {
         const dateFilter = filterModel['date'];
         if (dateFilter.dateFrom) {
@@ -184,18 +196,6 @@ export class OperacionesGridComponent implements OnInit {
       console.log('Actividad cambiada:', event.data);
     }
   };
-
-  constructor(private operariosService: OperariosService) {}
-
-  ngOnInit(): void {
-    this.operariosService.getOperarios().subscribe((data: Operario[]) => {
-      this.operarios = data;
-
-      this.operarios.forEach(operario => {
-        this.mostrarOperarios[operario.nombre] = true;
-      });
-    });
-  }
 
   getOperariosFiltrados(): Operario[] {
     return this.operarios.filter(operario => this.mostrarOperarios[operario.nombre]);
@@ -213,4 +213,3 @@ export class OperacionesGridComponent implements OnInit {
     }
   }
 }
-
